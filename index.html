@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Anirudh Nair | Portfolio</title>
+  <meta name="description" content="Anirudh Nair - AI Engineer & Product Builder. Explore projects, demos, and contact information.">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* Reset & Base Styles */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; line-height: 1.6; background: #f9f9f9; color: #1a1a1a; }
+    a { text-decoration: none; color: inherit; }
+    img { max-width: 100%; }
+
+    /* Container */
+    .container { max-width: 900px; margin: 0 auto; padding: 2rem; }
+
+    /* Header */
+    header { text-align: center; padding: 4rem 0 2rem; }
+    header h1 { font-size: 2.5rem; font-weight: 700; margin-bottom: 0.5rem; }
+    header p { font-size: 1.2rem; color: #555; }
+
+    /* Navigation */
+    nav { text-align: center; margin: 2rem 0; }
+    nav a { margin: 0 1rem; font-weight: 600; transition: color 0.3s; }
+    nav a:hover { color: #0070f3; }
+
+    /* Sections */
+    section { margin: 4rem 0; }
+    section h2 { font-size: 2rem; margin-bottom: 1rem; border-bottom: 2px solid #0070f3; display: inline-block; padding-bottom: 0.25rem; }
+    section p { color: #555; margin-bottom: 1rem; }
+    .projects { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; }
+    .project-card { background: #fff; padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); transition: transform 0.3s, box-shadow 0.3s; }
+    .project-card:hover { transform: translateY(-5px); box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
+    .project-card h3 { font-size: 1.25rem; margin-bottom: 0.5rem; }
+    .project-card p { font-size: 0.95rem; }
+
+    /* Footer */
+    footer { text-align: center; margin: 4rem 0 2rem; color: #888; font-size: 0.9rem; }
+
+    /* Buttons / Links */
+    .btn { display: inline-block; padding: 0.5rem 1.2rem; background: #0070f3; color: #fff; border-radius: 6px; font-weight: 600; transition: background 0.3s; }
+    .btn:hover { background: #005acc; }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      header h1 { font-size: 2rem; }
+      section h2 { font-size: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header / Hero -->
+  <header>
+    <h1>Anirudh Nair</h1>
+    <p>AI Engineer & Product Builder | Creating impactful tools and documentation</p>
+    <nav>
+      <a href="#projects">Projects</a>
+      <a href="#about">About</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </header>
+
+  <!-- Projects Section -->
+  <section id="projects">
+    <h2>Projects</h2>
+    <div class="projects">
+      <div class="project-card">
+        <h3>TensorGrad</h3>
+        <p>Custom AI/ML library with simple API for training models efficiently. <a class="btn" href="https://github.com/autodifflabs/TensorGrad" target="_blank">View Repo</a></p>
+      </div>
+      <div class="project-card">
+        <h3>AI Canvas</h3>
+        <p>Web-based AI canvas tool for creating demos and presentations from natural language prompts. <a class="btn" href="#" target="_blank">Live Demo</a></p>
+      </div>
+      <div class="project-card">
+        <h3>Autodiff Labs</h3>
+        <p>Documentation and ML resources hub. <a class="btn" href="https://autodifflabs.github.io/docs/" target="_blank">Visit Docs</a></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- About Section -->
+  <section id="about">
+    <h2>About Me</h2>
+    <p>I’m a solutions engineer and AI enthusiast focused on building tools and documentation that bridge the gap between complex AI models and practical applications. I write, build, and share projects that help engineers and product teams achieve more.</p>
+  </section>
+
+  <!-- Contact Section -->
+  <section id="contact">
+    <h2>Contact</h2>
+    <p>Feel free to reach out to me via email or connect on LinkedIn:</p>
+    <p>
+      <a class="btn" href="mailto:anirudh@example.com">Email Me</a>
+      <a class="btn" href="https://www.linkedin.com/in/anirudh-nair" target="_blank">LinkedIn</a>
+    </p>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    &copy; 2025 Anirudh Nair. All rights reserved.
+  </footer>
+
+</body>
+</html>
