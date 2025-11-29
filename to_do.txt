@@ -1,0 +1,4 @@
+1. Organize blog pages
+2. customize all blog page layout
+2.5 Customize blog page layout and design
+3. Tag and organize blogs based on their topics and fields
