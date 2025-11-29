@@ -4,7 +4,9 @@ title: "Blog"
 ---
 
 <h1>All Posts</h1>
-
+<a href="{{ '/blogs/feed.xml' | relative_url }}">
+  <img src="/blogs/assets/rss.png" width="20" height="20" alt="RSS">
+</a>
 <ul>
   {% for post in site.posts %}
   <li style="margin-bottom: 12px;">

@@ -8,6 +8,9 @@ plugins:
   - jekyll-feed
   - jekyll-seo-tag
 
+feed:
+  path: feed.xml
+
 markdown: kramdown
 paginate: 10
 paginate_path: "/page:num/"
