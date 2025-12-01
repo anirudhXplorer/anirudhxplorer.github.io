@@ -1,0 +1,583 @@
+<!--FYI I did not create this template it was vibe coded, I kept updating it for my use, and it was uptodate so thought why not?-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLM Architect: The From-Scratch Blueprint</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f5f5f0; /* Warm neutral, paper-like */
+            color: #1f2937;
+        }
+
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Chart Container Styling - Mandatory Strictness */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+
+        /* Custom Scrollbar for technical feel */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #e5e7eb;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #9ca3af;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #6b7280;
+        }
+
+        .card-shadow {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .active-phase {
+            border-bottom: 3px solid #4f46e5;
+            color: #4f46e5;
+            font-weight: 700;
+        }
+        
+        .step-item.active {
+            background-color: #eff6ff;
+            border-left: 4px solid #3b82f6;
+        }
+    </style>
+    <!-- Chosen Palette: Technical Blueprint. Warm paper background (#f5f5f0) with technical text (#1f2937). Accents: Indigo for navigation, Slate for structure, Emerald/Amber/Rose for languages. -->
+    <!-- Application Structure Plan: 
+         1. Dashboard Header: High-level summary and global metrics (Language distribution, progress overview).
+         2. Phase Navigator: A horizontal scrolling rail to select one of the 9 phases of construction.
+         3. The Workbench (Split View): 
+            - Left: "Step List" - A scrollable list of tasks within the selected phase. Searchable and filterable.
+            - Right: "Blueprint Card" - Detailed view of the selected step (Action, Concept, Component).
+         4. Rationale: The linear list of 80 steps is overwhelming. Grouping by Phase makes it digestible. The split view allows users to browse titles and dive into details without losing context. Charts provide a macro view of the complexity balance between languages.
+    -->
+    <!-- Visualization & Content Choices:
+         - Phase Complexity (Bar Chart): Shows the workload distribution across phases.
+         - Language Stack (Doughnut Chart): Visualizes the "C vs C++ vs Python" balance.
+         - Step List (Interactive HTML): Allows rapid scanning of components.
+         - Detail Card (Dynamic DOM): Updates instantly to show technical details without page reloads.
+         - NO SVG/Mermaid: All icons are Unicode. Charts are Canvas (Chart.js).
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+</head>
+<body class="h-screen flex flex-col overflow-hidden">
+
+    <!-- Header -->
+    <header class="bg-white border-b border-gray-300 px-6 py-4 flex justify-between items-center shadow-sm shrink-0">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-800 tracking-tight">🏗️ Architect LLM<span class="text-gray-400 font-light">| From Scratch Blueprint</span></h1>
+            <p class="text-sm text-gray-500 mt-1">Roadmap to building an LLM using C, C++, and Python</p>
+        </div>
+        <div class="hidden md:flex space-x-4 text-sm font-medium">
+            <div class="flex items-center"><span class="w-3 h-3 rounded-full bg-rose-500 mr-2"></span>C (Speed)</div>
+            <div class="flex items-center"><span class="w-3 h-3 rounded-full bg-blue-600 mr-2"></span>C++ (Structure)</div>
+            <div class="flex items-center"><span class="w-3 h-3 rounded-full bg-emerald-500 mr-2"></span>Python (Logic)</div>
+        </div>
+    </header>
+
+    <!-- Main Content Grid -->
+    <main class="flex-1 flex flex-col md:flex-row overflow-hidden">
+        
+        <!-- Left Sidebar: Phase Navigation & Stats (Mobile: Top, Desktop: Left) -->
+        <aside class="w-full md:w-64 lg:w-80 bg-gray-50 border-r border-gray-200 flex flex-col shrink-0 overflow-y-auto z-10">
+            <!-- Global Stats Area -->
+            <div class="p-4 border-b border-gray-200 bg-white">
+                <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Project Metrics</h3>
+                <div class="chart-container h-40 mb-4">
+                    <canvas id="langChart"></canvas>
+                </div>
+                <div class="grid grid-cols-2 gap-2 text-center">
+                    <div class="bg-gray-100 p-2 rounded">
+                        <div class="text-xl font-bold text-indigo-600">80</div>
+                        <div class="text-[10px] text-gray-500 uppercase">Total Steps</div>
+                    </div>
+                    <div class="bg-gray-100 p-2 rounded">
+                        <div class="text-xl font-bold text-gray-700">9</div>
+                        <div class="text-[10px] text-gray-500 uppercase">Phases</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Phase Navigation List -->
+            <div class="flex-1 overflow-y-auto">
+                <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider px-4 py-3 bg-gray-50 sticky top-0">Construction Phases</h3>
+                <nav id="phaseNav" class="space-y-1 px-2 pb-4">
+                    <!-- Phases injected by JS -->
+                </nav>
+            </div>
+        </aside>
+
+        <!-- Center/Right: The Workbench -->
+        <div class="flex-1 flex flex-col bg-[#f5f5f0] min-w-0">
+            
+            <!-- Phase Header Info -->
+            <div id="phaseHeader" class="bg-white px-6 py-5 border-b border-gray-200 shrink-0">
+                <!-- Injected via JS -->
+            </div>
+
+            <!-- Split View: List & Detail -->
+            <div class="flex-1 flex flex-col md:flex-row overflow-hidden">
+                
+                <!-- Step List Column -->
+                <div class="w-full md:w-1/2 lg:w-5/12 border-r border-gray-200 flex flex-col bg-white h-full">
+                    <!-- Toolbar -->
+                    <div class="p-3 border-b border-gray-100 flex gap-2 bg-gray-50 shrink-0">
+                        <input type="text" id="searchInput" placeholder="Search steps..." class="flex-1 px-3 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                        <div class="flex bg-white rounded border border-gray-300 overflow-hidden">
+                            <button class="px-2 py-1 hover:bg-gray-100 text-xs font-medium text-gray-600 border-r" onclick="filterLang('all')">All</button>
+                            <button class="px-2 py-1 hover:bg-gray-100 text-xs font-medium text-rose-600 border-r" onclick="filterLang('C')">C</button>
+                            <button class="px-2 py-1 hover:bg-gray-100 text-xs font-medium text-blue-600 border-r" onclick="filterLang('C++')">C++</button>
+                            <button class="px-2 py-1 hover:bg-gray-100 text-xs font-medium text-emerald-600" onclick="filterLang('Python')">Py</button>
+                        </div>
+                    </div>
+                    <!-- List Container -->
+                    <div id="stepList" class="flex-1 overflow-y-auto p-0">
+                        <!-- Steps injected by JS -->
+                    </div>
+                </div>
+
+                <!-- Detail View Column -->
+                <div class="w-full md:w-1/2 lg:w-7/12 bg-gray-50 p-6 overflow-y-auto flex flex-col">
+                    <div id="detailView" class="max-w-2xl mx-auto w-full transition-all duration-300">
+                        <!-- Content injected by JS -->
+                        <div class="flex flex-col items-center justify-center h-64 text-gray-400">
+                            <span class="text-4xl mb-2">👆</span>
+                            <p>Select a step to view the blueprint details.</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Phase Complexity Chart (Contextual) -->
+                    <div class="mt-8 pt-8 border-t border-gray-200">
+                        <h4 class="text-sm font-bold text-gray-500 mb-4">Phase Workload Distribution</h4>
+                        <div class="chart-container h-48">
+                            <canvas id="phaseChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- JavaScript Data & Logic -->
+    <script>
+        // --- DATA STORAGE ---
+        // Storing the full Source Report content structure
+        const phases = [
+            {
+                id: "I",
+                title: "The Foundation: Memory & Tensors",
+                desc: "Establishing the bedrock of the system. We manually manage RAM to create a high-performance playground for numbers. This phase builds the C/C++ infrastructure required to handle multidimensional data (Tensors) without relying on libraries like NumPy.",
+                steps: [
+                    { id: 1, component: "Allocator", lang: "C", action: "Create a function to request raw bytes of RAM from the OS.", concept: "We need a dedicated playground in memory to store our numbers." },
+                    { id: 2, component: "Deallocator", lang: "C", action: "Create a function to return memory to the OS when done.", concept: "Preventing memory leaks (where RAM fills up and crashes the PC)." },
+                    { id: 3, component: "Tensor Struct", lang: "C++", action: "Define a blueprint (class) that holds a pointer to data, size, and shape.", concept: "\"Raw memory\" is just a long line; a \"Tensor\" gives it structure (rows, columns)." },
+                    { id: 4, component: "Shape Logic", lang: "C++", action: "Implement logic to store dimensions (e.g., [3, 4] for a matrix).", concept: "We need to know if our data is a list, a grid, or a cube." },
+                    { id: 5, component: "Strides", lang: "C++", action: "Calculate \"steps\" needed to jump from one row to the next in flat memory.", concept: "Computers read memory in a straight line; strides map that line to a grid." },
+                    { id: 6, component: "Fill", lang: "C", action: "Write a loop to set all numbers in a tensor to a specific value (like 0).", concept: "Clearing the whiteboard before we start writing math on it." },
+                    { id: 7, component: "Random Init", lang: "C", action: "Write a function to fill a tensor with random numbers between -1 and 1.", concept: "Neural networks can't start with zero; they need random \"noise\" to start learning." },
+                    { id: 8, component: "View/Reshape", lang: "C++", action: "Change the reported shape without moving the actual data in memory.", concept: "Sometimes we need to look at a 12-item list as a 3x4 grid without copying it." },
+                    { id: 9, component: "Slice", lang: "C++", action: "Create a new Tensor that points to a specific section of an existing Tensor.", concept: "Zooming in on a specific part of the data (like looking at just one word in a sentence)." },
+                    { id: 10, component: "Contiguous Check", lang: "C++", action: "Check if data is physically next to each other in RAM.", concept: "Math is faster when data is neighbors; if it's scattered, we might need to copy it." }
+                ]
+            },
+            {
+                id: "II",
+                title: "The Compute Engine (Hot Kernels)",
+                desc: "The muscle of the operation. Here we implement the mathematical operations (Kernels) in pure C for maximum speed. This includes everything from basic addition to the critical Matrix Multiplication, optimized with SIMD instructions.",
+                steps: [
+                    { id: 11, component: "Add/Sub", lang: "C", action: "Write a loop to add two arrays of numbers together, one by one.", concept: "The most basic math; combining signals." },
+                    { id: 12, component: "Mul/Div", lang: "C", action: "Write a loop to multiply/divide two arrays.", concept: "Scaling signals up or down." },
+                    { id: 13, component: "Broadcasting", lang: "C++", action: "Logic to virtually stretch a small array (e.g., [1]) to match a big one (e.g., [10]).", concept: "Adding a single \"bias\" number to every number in a long list." },
+                    { id: 14, component: "MatMul (Naive)", lang: "C", action: "Write a triple-loop (i, j, k) to multiply two matrices.", concept: "The core operation of AI. It combines inputs with weights to find patterns." },
+                    { id: 15, component: "Transposing", lang: "C", action: "Flip a matrix (rows become columns) in memory.", concept: "Optimizing data layout so the CPU reads it faster during multiplication." },
+                    { id: 16, component: "MatMul (Tiled)", lang: "C", action: "Break matrix multiplication into small \"blocks\" that fit in CPU cache.", concept: "Speedup: CPU hates fetching data from main RAM; it prefers keeping small chunks close." },
+                    { id: 17, component: "SIMD Setup", lang: "C", action: "Import CPU vector instructions (AVX/Neon).", concept: "Preparing to do 8 or 16 math operations in a single CPU clock cycle." },
+                    { id: 18, component: "MatMul (Vectorized)", lang: "C", action: "Rewrite the inner loop of MatMul using SIMD instructions.", concept: "Making the heavy math run 8x to 16x faster." },
+                    { id: 19, component: "Relu", lang: "C", action: "Function: if x > 0 return x, else return 0.", concept: "The simplest \"switch.\" It turns off negative/irrelevant signals." },
+                    { id: 20, component: "Exp", lang: "C", action: "Calculate e^x for every number in the array.", concept: "Essential for probability; turns sums into positive scales." },
+                    { id: 21, component: "Log", lang: "C", action: "Calculate natural logarithm.", concept: "Used to reverse exponents, mostly for calculating error (loss)." },
+                    { id: 22, component: "Sum", lang: "C", action: "Add up all numbers in a tensor (or along a specific row).", concept: "collapsing data; e.g., finding the total error." },
+                    { id: 23, component: "Max", lang: "C", action: "Find the largest number in a list.", concept: "Finding the most likely prediction." }
+                ]
+            },
+            {
+                id: "III",
+                title: "Automatic Differentiation (The Learning Engine)",
+                desc: "The brain that allows the model to learn. We implement a computation graph that records operations and can replay them backwards (Backpropagation) to calculate gradients—the 'directions' needed to improve the model.",
+                steps: [
+                    { id: 24, component: "Node Class", lang: "C++", action: "Create a wrapper that holds a Tensor and knows who its \"parents\" are.", concept: "Tracking the history of every number so we can retrace our steps." },
+                    { id: 25, component: "Function Class", lang: "C++", action: "A base class for operations (Add, Mul) with forward and backward methods.", concept: "Defining that every math action has a reverse action (gradient)." },
+                    { id: 26, component: "Graph Tape", lang: "C++", action: "A list that records every operation performed in order.", concept: "A \"diary\" of calculations used to replay the math backward." },
+                    { id: 27, component: "Topological Sort", lang: "C++", action: "Algorithm to sort the graph so we process dependencies in the right order.", concept: "Ensuring we don't calculate the derivative of Z before we finish Y." },
+                    { id: 28, component: "Backward (Add)", lang: "C++", action: "Logic: If c = a + b, the gradient flows equally to a and b.", concept: "Distributing the \"blame\" for error to the inputs." },
+                    { id: 29, component: "Backward (Mul)", lang: "C++", action: "Logic: If c = a * b, a gets b's gradient, b gets a's gradient.", concept: "The \"switcheroo\" rule of calculus." },
+                    { id: 30, component: "Backward (MatMul)", lang: "C++", action: "Transpose the weights and multiply by the incoming gradient.", concept: "The heavy lifting of learning; updating the massive grid of weights." },
+                    { id: 31, component: "Accumulate Grad", lang: "C++", action: "If a tensor is used twice, add up the gradients from both places.", concept: "If a number influenced the result in two ways, it gets feedback from both." },
+                    { id: 32, component: "Zero Grad", lang: "C++", action: "Function to wipe all gradients clean.", concept: "Resetting the \"blame counter\" before looking at the next batch of data." },
+                    { id: 33, component: "Python Binding", lang: "C++/Py", action: "Use ctypes or pybind11 to expose the Tensor/Graph to Python.", concept: "We want to write our models in Python, but run them in C++." }
+                ]
+            },
+            {
+                id: "IV",
+                title: "Neural Network Primitives",
+                desc: "Building the Lego bricks of Deep Learning. We create the classes that Data Scientists are familiar with (Linear Layers, Embeddings) using our C++ engine, exposed to Python.",
+                steps: [
+                    { id: 34, component: "Parameter", lang: "Python", action: "A special Tensor wrapper that tells the engine \"Train this variable.\"", concept: "Distinguishing between data (input) and knowledge (weights)." },
+                    { id: 35, component: "Module", lang: "Python", action: "Base class that holds Parameters and sub-modules.", concept: "The container for organizing layers (like a Lego brick)." },
+                    { id: 36, component: "Linear Layer", lang: "Python", action: "A class containing Weight W and Bias b. Executes y = xW + b.", concept: "The standard \"neuron\" connection. It transforms input features into output features." },
+                    { id: 37, component: "Kaiming Init", lang: "Python", action: "Smart random initialization logic for weights.", concept: "Setting starting weights carefully so signals don't vanish or explode during training." },
+                    { id: 38, component: "Dropout", lang: "C", action: "Randomly set some numbers to zero during training.", concept: "Forcing the model to not rely on any single neuron (prevents memorization)." },
+                    { id: 39, component: "Embedding", lang: "C/Py", action: "A lookup table: Input ID 55 -> Row 55 of a matrix.", concept: "Converting token IDs (integers) into rich vectors of numbers." }
+                ]
+            },
+            {
+                id: "V",
+                title: "Advanced Components (Llama 3 Specifics)",
+                desc: "Implementing the modern architectural features that define Llama 3, including RMSNorm for stability, SwiGLU for activation, and RoPE for position encoding.",
+                steps: [
+                    { id: 40, component: "RMSNorm Kernel", lang: "C", action: "Calculate Root Mean Square of a row, then divide the row by it.", concept: "Standardizing signal strength. Like adjusting volume so no section is too loud/quiet." },
+                    { id: 41, component: "RMSNorm Backward", lang: "C", action: "The gradient calculation for RMSNorm.", concept: "Learning the scaling factors." },
+                    { id: 42, component: "Silu (Swish)", lang: "C", action: "Implement x * sigmoid(x).", concept: "A smooth, modern activation function that works better than ReLU." },
+                    { id: 43, component: "SwiGLU", lang: "Python", action: "Combine 3 linear layers and SiLU: (SiLU(xW) * xV)W_2.", concept: "The \"gating\" logic of Llama 3. It lets the model decide which information to pass through." },
+                    { id: 44, component: "RoPE Setup", lang: "Python", action: "Pre-compute Sine and Cosine frequencies based on dimension.", concept: "Preparing the \"rotation\" angles for every position in the sequence." },
+                    { id: 45, component: "RoPE Kernel", lang: "C", action: "Rotate pairs of numbers in the vector by the pre-computed angles.", concept: "Encoding \"position\" by rotating the data, not just adding to it. Preserves relative distance." },
+                    { id: 46, component: "Softmax", lang: "C", action: "e^x / sum e^x. Make all numbers positive and sum to 1.", concept: "Converting raw scores into probabilities (0% to 100%)." },
+                    { id: 47, component: "Softmax Stable", lang: "C", action: "Subtract the max value before exponentiating.", concept: "Preventing computer overflow (Infinity) when numbers get too big." },
+                    { id: 48, component: "Cross Entropy", lang: "C", action: "Calculate the difference between predicted probability and actual word.", concept: "The scorecard. It tells the model how wrong it was." }
+                ]
+            },
+            {
+                id: "VI",
+                title: "The Transformer Block (The Brain)",
+                desc: "Assembling the core processing unit. This phase connects Attention mechanisms (how the model relates words) with Feed-Forward networks and Residual connections.",
+                steps: [
+                    { id: 49, component: "Attention Heads", lang: "Python", action: "Logic to split a big vector (4096) into small heads (32 x 128).", concept: "Letting the model look at 32 different aspects of the sentence at once." },
+                    { id: 50, component: "Q, K, V Proj", lang: "Python", action: "Three Linear layers to create Query, Key, and Value vectors.", concept: "Q: What I'm looking for. K: What I contain. V: What I will pass on if matched." },
+                    { id: 51, component: "GQA Logic", lang: "Python", action: "\"Grouped Query Attention\": Share K and V heads across multiple Q heads.", concept: "Saving memory. We don't need a unique Key for every single Query." },
+                    { id: 52, component: "Scaled Dot Prod", lang: "Python", action: "Multiply Q and K, divide by sqrt(dim).", concept: "Calculating \"Relevance Scores.\" How much does Word A care about Word B?" },
+                    { id: 53, component: "Causal Mask", lang: "C", action: "Create a triangle matrix of -Infinity.", concept: "Ensuring the model can't \"cheat\" by looking at future words during training." },
+                    { id: 54, component: "Attention Softmax", lang: "Python", action: "Apply Softmax to the scores.", concept: "Deciding which words to pay attention to (e.g., 90% attention on \"King\", 10% on \"Man\")." },
+                    { id: 55, component: "Context Agg", lang: "Python", action: "Multiply Probabilities by V (Values).", concept: "Constructing the new meaning of the word based on what it attended to." },
+                    { id: 56, component: "Output Proj", lang: "Python", action: "A final Linear layer to mix the results of all heads.", concept: "Combining the 32 different observations back into one cohesive thought." },
+                    { id: 57, component: "Residual Conn", lang: "Python", action: "Output = Input + Attention(Input).", concept: "\"Skip connections.\" Prevents the original information from being lost or garbled." },
+                    { id: 58, component: "Transformer Blk", lang: "Python", action: "Combine: RMSNorm -> Attention -> Residual -> RMSNorm -> SwiGLU -> Residual.", concept: "The fundamental building block. Llama 3 just stacks 32 of these." }
+                ]
+            },
+            {
+                id: "VII",
+                title: "Model Architecture & Tokenizer",
+                desc: "Constructing the full body of the Llama model and giving it a voice. We define the global configuration and build the Tokenizer that translates text into numbers.",
+                steps: [
+                    { id: 59, component: "Model Config", lang: "Python", action: "A simple class to store hyperparams (layers=32, dim=4096, vocab=128k).", concept: "The blueprints for the specific size of the building." },
+                    { id: 60, component: "Llama Model", lang: "Python", action: "Class creating the Embedding, 32 Blocks, and Final Norm.", concept: "The body of the LLM." },
+                    { id: 61, component: "The Head", lang: "Python", action: "A final Linear layer mapping 4096 -> 128,000 (Vocab size).", concept: "Converting the final abstract thought into a list of scores for every possible word." },
+                    { id: 62, component: "Byte Pair Enc", lang: "Python", action: "Algorithm to count frequent character pairs and merge them.", concept: "\"Training\" the tokenizer. Merging 't' and 'h' into 'th'." },
+                    { id: 63, component: "Vocab Builder", lang: "Python", action: "Create the list of 128,000 tokens and assign IDs.", concept: "Creating the dictionary the model uses to speak." },
+                    { id: 64, component: "Encode/Decode", lang: "Python", action: "Functions to turn Text -> IDs and IDs -> Text.", concept: "The translator between human language and computer numbers." }
+                ]
+            },
+            {
+                id: "VIII",
+                title: "Training Infrastructure",
+                desc: "The gym where the model learns. We build the data pipelines, optimization algorithms (AdamW), and training loops necessary to teach the model from data.",
+                steps: [
+                    { id: 65, component: "Dataset Class", lang: "Python", action: "Load text file, slice into chunks of length 8192.", concept: "Preparing the reading material." },
+                    { id: 66, component: "DataLoader", lang: "Python", action: "Batch small chunks together (e.g., 4 at a time).", concept: "Computers read faster in bundles than one page at a time." },
+                    { id: 67, component: "AdamW Step", lang: "Python", action: "Implement weight update: w = w - lr * (moment / sqrt(variance)).", concept: "The logic that actually improves the model based on the gradients." },
+                    { id: 68, component: "Learning Rate", lang: "Python", action: "A scheduler to lower the learning rate over time.", concept: "Start learning fast, then slow down to refine the details." },
+                    { id: 69, component: "Grad Clip", lang: "C++", action: "Cap gradients if they get too large.", concept: "Preventing a single bad example from destroying the model's knowledge." },
+                    { id: 70, component: "Checkpointer", lang: "Python", action: "Save the Tensor data to a binary file.", concept: "Saving progress so we don't lose days of training if power fails." },
+                    { id: 71, component: "Load Weights", lang: "Python", action: "Read binary file and load into Tensors.", concept: "Resuming training or loading a pre-trained model." }
+                ]
+            },
+            {
+                id: "IX",
+                title: "Inference & Optimization",
+                desc: "Optimization for chat. We implement the KV Cache to remember conversation history efficiently and sampling strategies (Top-P, Temp) to generate human-like text.",
+                steps: [
+                    { id: 72, component: "KV Cache Init", lang: "C++", action: "Allocate memory to store K and V vectors from previous steps.", concept: "Chat memory. We don't want to re-read the whole conversation for every new word." },
+                    { id: 73, component: "KV Update", lang: "C++", action: "Custom kernel to slot new K/V data into the cache without moving memory.", concept: "Efficiently adding the latest word to the memory bank." },
+                    { id: 74, component: "Greedy Search", lang: "Python", action: "Pick the token with the absolute highest score.", concept: "The most robotic/logical way to generate text." },
+                    { id: 75, component: "Temperature", lang: "C", action: "Divide logits by a value T.", concept: "Controlling \"creativity.\" High T flattens the curve (more random), Low T sharpens it." },
+                    { id: 76, component: "Top-K Sample", lang: "C", action: "Sort logits, keep top K, zero out the rest.", concept: "Forcing the model to choose from only the 50 best options (keeps it on topic)." },
+                    { id: 77, component: "Top-P Sample", lang: "C", action: "Keep top tokens until their sum probability hits P (e.g., 0.9).", concept: "Dynamic selection. \"Nucleus sampling\" (the standard for high-quality chat)." },
+                    { id: 78, component: "Multinomial", lang: "C", action: "Pick an index based on probability mass.", concept: "The \"roll of the dice\" to actually select the next word." },
+                    { id: 79, component: "Detokenize", lang: "Python", action: "Stream IDs back into text, handling partial unicode bytes.", concept: "Displaying the text to the user as it generates (typing effect)." },
+                    { id: 80, component: "Chat Loop", lang: "Python", action: "While True: Input -> Model -> Generate -> Print -> Append to History.", concept: "The interactive loop that makes it feel like a chatbot." }
+                ]
+            }
+        ];
+
+        // --- STATE MANAGEMENT ---
+        let currentPhaseIndex = 0;
+        let activeFilter = 'all';
+
+        // --- DOM REFERENCES ---
+        const phaseNav = document.getElementById('phaseNav');
+        const phaseHeader = document.getElementById('phaseHeader');
+        const stepList = document.getElementById('stepList');
+        const detailView = document.getElementById('detailView');
+        const searchInput = document.getElementById('searchInput');
+
+        // --- COLOR MAPPING ---
+        const langColors = {
+            'C': 'rose',
+            'C++': 'blue',
+            'Python': 'emerald',
+            'C/Py': 'purple',
+            'C++/Py': 'indigo'
+        };
+
+        const getLangBadge = (lang) => {
+            const color = langColors[lang] || 'gray';
+            return `<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-${color}-100 text-${color}-800 border border-${color}-200">${lang}</span>`;
+        };
+
+        // --- CHART INITIALIZATION ---
+        // 1. Language Distribution (Donut)
+        // Aggregate language counts across all phases
+        const langCounts = {};
+        phases.forEach(p => p.steps.forEach(s => {
+            const l = s.lang.includes('/') ? s.lang.split('/')[0] : s.lang; // Simplify dual langs
+            langCounts[l] = (langCounts[l] || 0) + 1;
+        }));
+
+        const langChartCtx = document.getElementById('langChart').getContext('2d');
+        new Chart(langChartCtx, {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(langCounts),
+                datasets: [{
+                    data: Object.values(langCounts),
+                    backgroundColor: ['#f43f5e', '#2563eb', '#10b981'], // Rose, Blue, Emerald
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return ` ${context.label}: ${context.raw} Steps`;
+                            }
+                        }
+                    }
+                },
+                cutout: '65%'
+            }
+        });
+
+        // 2. Phase Distribution (Bar)
+        const phaseLengths = phases.map(p => p.steps.length);
+        const phaseLabels = phases.map(p => p.id);
+        
+        const phaseChartCtx = document.getElementById('phaseChart').getContext('2d');
+        new Chart(phaseChartCtx, {
+            type: 'bar',
+            data: {
+                labels: phaseLabels,
+                datasets: [{
+                    label: 'Steps per Phase',
+                    data: phaseLengths,
+                    backgroundColor: '#e5e7eb',
+                    hoverBackgroundColor: '#6366f1',
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: { beginAtZero: true, grid: { display: false } },
+                    x: { grid: { display: false } }
+                },
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+
+
+        // --- UI FUNCTIONS ---
+
+        function init() {
+            renderPhaseNav();
+            loadPhase(0);
+            
+            // Search Listener
+            searchInput.addEventListener('input', (e) => {
+                const term = e.target.value.toLowerCase();
+                renderSteps(phases[currentPhaseIndex], term);
+            });
+        }
+
+        function renderPhaseNav() {
+            phaseNav.innerHTML = phases.map((phase, index) => `
+                <button 
+                    onclick="loadPhase(${index})"
+                    class="w-full text-left px-4 py-3 text-sm flex items-center justify-between hover:bg-gray-100 transition-colors ${index === currentPhaseIndex ? 'active-phase bg-white border-l-4 border-l-indigo-600' : 'text-gray-600'}"
+                    id="phase-btn-${index}"
+                >
+                    <span class="font-mono text-xs mr-2 text-gray-400">Phase ${phase.id}</span>
+                    <span class="truncate font-medium flex-1">${phase.title.split(':')[0]}</span>
+                    <span class="text-xs bg-gray-200 text-gray-600 px-1.5 rounded-full ml-2">${phase.steps.length}</span>
+                </button>
+            `).join('');
+        }
+
+        function loadPhase(index) {
+            currentPhaseIndex = index;
+            
+            // Update Nav Styling
+            document.querySelectorAll('#phaseNav button').forEach(btn => {
+                btn.classList.remove('active-phase', 'bg-white', 'border-l-4', 'border-l-indigo-600');
+                btn.classList.add('text-gray-600');
+            });
+            const activeBtn = document.getElementById(`phase-btn-${index}`);
+            activeBtn.classList.add('active-phase', 'bg-white', 'border-l-4', 'border-l-indigo-600');
+            activeBtn.classList.remove('text-gray-600');
+
+            // Render Header
+            const phase = phases[index];
+            phaseHeader.innerHTML = `
+                <div class="flex items-center justify-between mb-2">
+                    <h2 class="text-xl font-bold text-gray-800">Phase ${phase.id}: ${phase.title.split(':')[1] || phase.title}</h2>
+                    <span class="text-xs font-mono text-gray-400">Step ${phase.steps[0].id} - ${phase.steps[phase.steps.length-1].id}</span>
+                </div>
+                <p class="text-sm text-gray-600 max-w-3xl leading-relaxed">${phase.desc}</p>
+            `;
+
+            // Reset Filter
+            activeFilter = 'all';
+            searchInput.value = '';
+
+            // Render Steps
+            renderSteps(phase);
+
+            // Clear Detail View
+            detailView.innerHTML = `
+                <div class="flex flex-col items-center justify-center h-64 text-gray-400 animate-pulse">
+                     <span class="text-4xl mb-2">⚡</span>
+                     <p>Select a step to inspect logic.</p>
+                </div>
+            `;
+        }
+
+        function filterLang(lang) {
+            activeFilter = lang;
+            renderSteps(phases[currentPhaseIndex], searchInput.value.toLowerCase());
+        }
+
+        function renderSteps(phase, searchTerm = '') {
+            const filteredSteps = phase.steps.filter(step => {
+                const matchesSearch = step.component.toLowerCase().includes(searchTerm) || 
+                                      step.action.toLowerCase().includes(searchTerm);
+                const matchesLang = activeFilter === 'all' || step.lang.includes(activeFilter);
+                return matchesSearch && matchesLang;
+            });
+
+            stepList.innerHTML = filteredSteps.map(step => `
+                <div 
+                    onclick="loadDetail(${step.id})" 
+                    class="step-item group p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-all duration-200"
+                    id="step-${step.id}"
+                >
+                    <div class="flex justify-between items-start mb-1">
+                        <span class="font-mono text-xs text-indigo-400 font-bold">#${step.id}</span>
+                        ${getLangBadge(step.lang)}
+                    </div>
+                    <h4 class="text-sm font-bold text-gray-800 group-hover:text-indigo-600 transition-colors">${step.component}</h4>
+                    <p class="text-xs text-gray-500 mt-1 line-clamp-2">${step.action}</p>
+                </div>
+            `).join('');
+            
+            if(filteredSteps.length === 0) {
+                stepList.innerHTML = `<div class="p-8 text-center text-sm text-gray-400">No steps match your filters.</div>`;
+            }
+        }
+
+        function loadDetail(stepId) {
+            // Find step across all phases (inefficient but safe for 80 items)
+            let step = null;
+            for(let p of phases) {
+                step = p.steps.find(s => s.id === stepId);
+                if(step) break;
+            }
+
+            // Update UI selection state
+            document.querySelectorAll('.step-item').forEach(el => el.classList.remove('active'));
+            const activeItem = document.getElementById(`step-${stepId}`);
+            if(activeItem) activeItem.classList.add('active');
+
+            // Render Detail Card
+            detailView.innerHTML = `
+                <div class="bg-white rounded-xl card-shadow overflow-hidden border border-gray-100 animate-fade-in-up">
+                    <div class="bg-gray-50 px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+                        <div class="flex items-center gap-3">
+                            <span class="flex items-center justify-center w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 font-mono text-sm font-bold">${step.id}</span>
+                            <h3 class="text-lg font-bold text-gray-800">${step.component}</h3>
+                        </div>
+                        ${getLangBadge(step.lang)}
+                    </div>
+                    
+                    <div class="p-6 space-y-6">
+                        <div>
+                            <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">🛠️ Action (What we build)</h4>
+                            <p class="text-gray-700 leading-relaxed bg-gray-50 p-3 rounded border border-gray-100 text-sm">
+                                ${step.action}
+                            </p>
+                        </div>
+                        
+                        <div>
+                            <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">💡 Concept (Why we need it)</h4>
+                            <div class="flex items-start gap-3">
+                                <div class="text-amber-400 mt-1">
+                                    <!-- Simple Bulb Icon via CSS/Unicode -->
+                                    <span class="text-lg">⚡</span>
+                                </div>
+                                <p class="text-gray-600 text-sm leading-relaxed italic">
+                                    "${step.concept}"
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Initialize App
+        init();
+
+    </script>
+</body>
+</html>
